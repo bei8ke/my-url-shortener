@@ -27,7 +27,8 @@ export default function Home() {
           urlC: `${origin}/${data.codeC}`,
         });
       } else {
-        alert(data.error || '生成失败');
+        alert(data.error || '生成失败，服务器返回了: ' + JSON.stringify(data));
+      
       }
     } catch (err) {
       alert('请求出错，请重试');
