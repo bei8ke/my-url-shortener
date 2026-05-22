@@ -11,19 +11,30 @@ export async function POST(request) {
       return Response.json({ error: '请提供有效的 URL' }, { status: 400 });
     }
 
-    // 随机生成一个 6 位数的短码
-    const shortCode = Math.random().toString(36).substring(2, 8);
+    // 1. 生成 3 个不同的随机短码
+    const codeA = Math.random().toString(36).substring(2, 8);
+    const codeB = Math.random().toString(36).substring(2, 8);
+    const codeC = Math.random().toString(36).substring(2, 8);
 
-    // 将映射关系插入到 Supabase 数据库
+    // 2. 构造包装后的链接
+    const targetB = `https://translate.google.com/translate?sl=auto&tl=en&u=${encodeURIComponent(url)}`;
+    const targetC = `https://www.google.com/url?q=${encodeURIComponent(targetB)}`;
+
+    // 3. 批量插入到 Supabase
     const { error } = await supabase
       .from('urls')
-      .insert([{ original_url: url, short_code: shortCode }]);
+      .insert([
+        { original_url: url, short_code: codeA },
+        { original_url: targetB, short_code: codeB },
+        { original_url: targetC, short_code: codeC }
+      ]);
 
     if (error) {
       return Response.json({ error: error.message }, { status: 500 });
     }
 
-    return Response.json({ shortCode });
+    // 4. 必须返回这三个新钥匙
+    return Response.json({ codeA, codeB, codeC });
   } catch (err) {
     return Response.json({ error: err.message }, { status: 500 });
   }
